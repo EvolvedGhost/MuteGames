@@ -3,23 +3,60 @@ package com.evolvedghost.duel
 import com.evolvedghost.duel.DuelConfig.allHurt
 import com.evolvedghost.duel.DuelConfig.messageEndDuel
 import com.evolvedghost.duel.DuelConfig.messageEndDuelAllHurt
+import com.evolvedghost.duel.DuelConfig.waitTime
 import com.evolvedghost.utils.debugLogger
+import com.evolvedghost.utils.exceptionLogger
 import com.evolvedghost.utils.messageGenerator
 import com.evolvedghost.utils.timeFormatter
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.at
 import kotlin.random.Random
 
-class Duel(target: Member, isAdmin: Boolean) {
+class Duel(target: Member, sender: CommandSender, isAdmin: Boolean) {
     private var waiter: Member? = null
+    private var sender: CommandSender? = null
     private var isWaiterAdmin = false
     private var isFinished = true
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private val endDuel = Thread {
+        run {
+            try {
+                Thread.sleep(waitTime.toLong() * 1000)
+                GlobalScope.launch {
+                    sender.sendMessage(
+                        messageGenerator(
+                            DuelConfig.messageTimeout, arrayOf("<target>", "<timeout-s>", "<timeout-f>"),
+                            arrayOf(
+                                target.at().serializeToMiraiCode(),
+                                waitTime.toString(),
+                                timeFormatter(waitTime)
+                            )
+                        )
+                    )
+                }
+            } catch (_: Exception) {
+            } finally {
+                isFinished = true
+            }
+        }
+    }
+
     init {
         waiter = target
+        this.sender = sender
         isWaiterAdmin = isAdmin
         isFinished = false
+        try {
+            endDuel.start()
+        } catch (e: Exception) {
+            exceptionLogger(e)
+        }
     }
 
     fun isFinished(): Boolean {
@@ -28,7 +65,11 @@ class Duel(target: Member, isAdmin: Boolean) {
     }
 
     fun endByAdmin() {
-        waiter = null
+        try {
+            endDuel.interrupt()
+        } catch (e: Exception) {
+            exceptionLogger(e)
+        }
     }
 
     fun isSameMember(fighter: Member): Boolean {
@@ -47,7 +88,11 @@ class Duel(target: Member, isAdmin: Boolean) {
                 val pos2 = DuelPosition(generator.nextInt(totalChance) + 1)
                 if (!isWaiterAdmin) waiter!!.mute(pos1.getMute())
                 if (!isAdmin) fighter.mute(pos2.getMute())
-                isFinished = true
+                try {
+                    endDuel.interrupt()
+                } catch (e: Exception) {
+                    exceptionLogger(e)
+                }
                 messageGenerator(
                     messageEndDuelAllHurt,
                     arrayOf(
@@ -88,7 +133,11 @@ class Duel(target: Member, isAdmin: Boolean) {
                     if (!isWaiterAdmin) waiter!!.mute(pos.getMute())
                     waiter!!
                 }
-                isFinished = true
+                try {
+                    endDuel.interrupt()
+                } catch (e: Exception) {
+                    exceptionLogger(e)
+                }
                 messageGenerator(
                     messageEndDuel,
                     arrayOf(

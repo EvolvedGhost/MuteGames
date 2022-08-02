@@ -8,6 +8,9 @@ object DuelConfig : ReadOnlyPluginConfig("duel") {
     @ValueDescription("自定义指令触发决斗\n请注意，该自定义指令的更改必须重启Mirai")
     val alias: MutableList<String> by value(mutableListOf("决斗"))
 
+    @ValueDescription("决斗等待时间，超过后上一个决斗失效，单位：秒")
+    val waitTime:Int by value(300)
+
     @ValueDescription("""
         随机决斗击中部位表<部位名:<禁言时间:秒,击中概率:Int>>
         概率可为任意值，值越大概率越高，插件会将全部作为整体计算概率（别超过Int范围即可）
@@ -53,9 +56,11 @@ object DuelConfig : ReadOnlyPluginConfig("duel") {
         """
         起始消息，可用替代项目为:
         <target> @触发人
+        <timeout-s> 超时时间（单位秒）（例:5）
+        <timeout-f> 超时时间（例:11天4时5分14秒）
     """
     )
-    val messageStartDuel: String by value("<target> 开启了决斗，他渴望一个有价值的对手")
+    val messageStartDuel: String by value("<target> 开启了决斗，他渴望一个有价值的对手，决斗将于<timeout-f>后超时")
 
     @ValueDescription(
         """
@@ -91,4 +96,14 @@ object DuelConfig : ReadOnlyPluginConfig("duel") {
     """
     )
     val messageEndDuelAllHurt: String by value("两位决斗者同时开枪，<target-1> 的<position-1>被<target-2> 开枪击中，获得<mute-f-1>养伤时间，<target-2> 的<position-2>被<target-1> 开枪击中，获得<mute-f-2>养伤时间")
+
+    @ValueDescription(
+        """
+        超时消息，可用替代项目为:
+        <target> @触发人
+        <timeout-s> 超时时间（单位秒）（例:5）
+        <timeout-f> 超时时间（例:11天4时5分14秒）
+    """
+    )
+    val messageTimeout: String by value("<target> 的决斗超时")
 }

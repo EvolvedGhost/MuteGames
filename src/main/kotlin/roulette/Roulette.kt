@@ -1,11 +1,20 @@
 package com.evolvedghost.roulette
 
+import com.evolvedghost.roulette.RouletteConfig.messageTimeout
+import com.evolvedghost.roulette.RouletteConfig.waitTime
 import com.evolvedghost.utils.debugLogger
+import com.evolvedghost.utils.exceptionLogger
+import com.evolvedghost.utils.messageGenerator
 import com.evolvedghost.utils.timeFormatter
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.mamoe.mirai.console.command.CommandSender
 import kotlin.random.Random
 
-class Roulette {
+class Roulette(sender: CommandSender) {
     private var finish = true
+    private var sender: CommandSender? = null
     private var current = -1
     private var chamber = -1
     private var bulletTotal = -1
@@ -13,15 +22,60 @@ class Roulette {
     private var mute = -1
     private var loaded = arrayOf<Boolean>()
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private val endRoulette = Thread {
+        run {
+            try {
+                Thread.sleep(waitTime.toLong() * 1000)
+                GlobalScope.launch {
+                    sender.sendMessage(
+                        messageGenerator(
+                            messageTimeout,
+                            arrayOf(
+                                "<bullet>",
+                                "<chamber>",
+                                "<remain-bullet>",
+                                "<remain-chamber>",
+                                "<mute-s>",
+                                "<mute-f>",
+                                "<timeout-s>",
+                                "<timeout-f>"
+                            ),
+                            arrayOf(
+                                getBullet(),
+                                getChamber(),
+                                getBulletRemain(),
+                                getChamberRemain(),
+                                getMute(),
+                                getMuteFormat(),
+                                waitTime.toString(),
+                                timeFormatter(waitTime)
+                            )
+                        )
+                    )
+                }
+            } catch (_: Exception) {
+            } finally {
+                finish = true
+            }
+        }
+    }
+
     init {
-        restart()
+        this.sender = sender
+        initRoulette()
+        try {
+            endRoulette.start()
+        } catch (e: Exception) {
+            exceptionLogger(e)
+        }
     }
 
     fun isFinished(): Boolean {
         return finish
     }
 
-    private fun restart() {
+    private fun initRoulette() {
         val generator = Random(System.currentTimeMillis())
         chamber = if (RouletteConfig.randomChamber) {
             generator.nextInt(RouletteConfig.chamberMax - RouletteConfig.chamber + 1) + RouletteConfig.chamber
@@ -55,13 +109,21 @@ class Roulette {
     }
 
     fun endByAdmin() {
-        finish = true
+        try {
+            endRoulette.interrupt()
+        } catch (e: Exception) {
+            exceptionLogger(e)
+        }
     }
 
     fun forceEnd(): Boolean {
         if (RouletteConfig.forceEndWhenAllRamin) {
             if (chamber - current == bullet) {
-                finish = true
+                try {
+                    endRoulette.interrupt()
+                } catch (e: Exception) {
+                    exceptionLogger(e)
+                }
                 return true
             }
         }
@@ -75,7 +137,11 @@ class Roulette {
         }
         current++
         if (bullet == 0 || current >= chamber) {
-            finish = true
+            try {
+                endRoulette.interrupt()
+            } catch (e: Exception) {
+                exceptionLogger(e)
+            }
         }
         return shot
     }

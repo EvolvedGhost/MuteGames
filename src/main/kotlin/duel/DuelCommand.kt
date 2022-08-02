@@ -3,8 +3,10 @@ package com.evolvedghost.duel
 import com.evolvedghost.MuteGames
 import com.evolvedghost.duel.DuelConfig.messageSameMember
 import com.evolvedghost.duel.DuelConfig.messageStartDuel
+import com.evolvedghost.duel.DuelConfig.waitTime
 import com.evolvedghost.utils.checkPermit
 import com.evolvedghost.utils.messageGenerator
+import com.evolvedghost.utils.timeFormatter
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
@@ -30,12 +32,14 @@ object DuelCommand : SimpleCommand(
         val isTargetAdmin = permit.isTargetAdmin ?: return
         duelMapLock.withLock {
             if (duelMap[group.id] == null || duelMap[group.id]!!.isFinished()) {
-                duelMap[group.id] = Duel(target, isTargetAdmin)
+                duelMap[group.id] = Duel(target, sender, isTargetAdmin)
                 sender.sendMessage(
                     messageGenerator(
-                        messageStartDuel, arrayOf("<target>"),
+                        messageStartDuel, arrayOf("<target>","<timeout-s>","<timeout-f>"),
                         arrayOf(
-                            target.at().serializeToMiraiCode()
+                            target.at().serializeToMiraiCode(),
+                            waitTime.toString(),
+                            timeFormatter(waitTime)
                         )
                     )
                 )

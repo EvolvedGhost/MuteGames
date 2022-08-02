@@ -9,3 +9,9 @@ fun debugLogger(message: String) {
         MuteGames.logger.info { message }
     }
 }
+
+fun exceptionLogger(e: Exception) {
+    if (debug) {
+        e.printStackTrace()
+    }
+}

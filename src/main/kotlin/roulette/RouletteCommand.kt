@@ -6,8 +6,10 @@ import com.evolvedghost.roulette.RouletteConfig.messageForceEnd
 import com.evolvedghost.roulette.RouletteConfig.messagePass
 import com.evolvedghost.roulette.RouletteConfig.messageShot
 import com.evolvedghost.roulette.RouletteConfig.messageStart
+import com.evolvedghost.roulette.RouletteConfig.waitTime
 import com.evolvedghost.utils.checkPermit
 import com.evolvedghost.utils.messageGenerator
+import com.evolvedghost.utils.timeFormatter
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
@@ -27,6 +29,9 @@ object RouletteCommand : SimpleCommand(
     private val keywordArray =
         arrayOf("<bullet>", "<chamber>", "<remain-bullet>", "<remain-chamber>", "<mute-s>", "<mute-f>", "<target>")
 
+    private val keywordArrayWithTimeout =
+        arrayOf("<bullet>", "<chamber>", "<remain-bullet>", "<remain-chamber>", "<mute-s>", "<mute-f>", "<timeout-s>", "<timeout-f>","<target>")
+
     @Handler
     suspend fun roulette(sender: CommandSender) {
         val permit = checkPermit(sender)
@@ -36,10 +41,10 @@ object RouletteCommand : SimpleCommand(
         if (dataCorrect) {
             rouletteMapLock.withLock {
                 if (rouletteMap[group.id] == null || rouletteMap[group.id]!!.isFinished()) {
-                    rouletteMap[group.id] = Roulette()
+                    rouletteMap[group.id] = Roulette(sender)
                     sender.sendMessage(
                         messageGenerator(
-                            messageStart, keywordArray,
+                            messageStart, keywordArrayWithTimeout,
                             arrayOf(
                                 rouletteMap[group.id]!!.getBullet(),
                                 rouletteMap[group.id]!!.getChamber(),
@@ -47,6 +52,8 @@ object RouletteCommand : SimpleCommand(
                                 rouletteMap[group.id]!!.getChamberRemain(),
                                 rouletteMap[group.id]!!.getMute(),
                                 rouletteMap[group.id]!!.getMuteFormat(),
+                                waitTime.toString(),
+                                timeFormatter(waitTime),
                                 target.at().serializeToMiraiCode()
                             )
                         )

@@ -8,6 +8,9 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
     @ValueDescription("自定义指令触发轮盘赌\n请注意，该自定义指令的更改必须重启Mirai")
     val alias: MutableList<String> by value(mutableListOf("轮盘", "俄罗斯轮盘"))
 
+    @ValueDescription("轮盘等待时间，超过后上一个轮盘失效，单位：秒")
+    val waitTime: Int by value(600)
+
     @ValueDescription("当最后数发均为子弹时强制结束游戏")
     val forceEndWhenAllRamin: Boolean by value(true)
 
@@ -47,10 +50,12 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
         <remain-chamber> 剩余击发数
         <mute-s> 禁言时间（单位秒）（例:5）
         <mute-f> 禁言时间（例:11天4时5分14秒）
+        <timeout-s> 超时时间（单位秒）（例:5）
+        <timeout-f> 超时时间（例:11天4时5分14秒）
         <target> @触发人
     """
     )
-    val messageStart: String by value("新一轮俄罗斯轮盘开启，这是一把<chamber>发的左轮手枪，装填了<bullet>发子弹，击发奖励为禁言<mute-f>")
+    val messageStart: String by value("新一轮俄罗斯轮盘开启，这是一把<chamber>发的左轮手枪，装填了<bullet>发子弹，击发奖励为禁言<mute-f>，轮盘将于<timeout-f>后超时")
 
     @ValueDescription(
         """
@@ -65,6 +70,21 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
     """
     )
     val messageEnd: String by value("此轮俄罗斯轮盘结束")
+
+    @ValueDescription(
+        """
+        超时消息，可用替代项目为:
+        <bullet> 子弹数量
+        <chamber> 弹膛数量
+        <remain-bullet> 剩余子弹数
+        <remain-chamber> 剩余击发数
+        <mute-s> 禁言时间（单位秒）（例:5）
+        <mute-f> 禁言时间（例:11天4时5分14秒）
+        <timeout-s> 超时时间（单位秒）（例:5）
+        <timeout-f> 超时时间（例:11天4时5分14秒）
+    """
+    )
+    val messageTimeout: String by value("此轮俄罗斯轮盘因超时结束")
 
     @ValueDescription(
         """
