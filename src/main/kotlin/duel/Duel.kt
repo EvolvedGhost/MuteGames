@@ -11,12 +11,14 @@ import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.at
 import kotlin.random.Random
 
-class Duel(target: Member) {
+class Duel(target: Member, isAdmin: Boolean) {
     private var waiter: Member? = null
+    private var isWaiterAdmin = false
     private var isFinished = true
 
     init {
         waiter = target
+        isWaiterAdmin = isAdmin
         isFinished = false
     }
 
@@ -34,7 +36,7 @@ class Duel(target: Member) {
         return fighter.id == waiter!!.id
     }
 
-    suspend fun join(fighter: Member): MessageChain {
+    suspend fun join(fighter: Member, isAdmin: Boolean): MessageChain {
         return if (waiter != null) {
             val generator = Random(System.currentTimeMillis())
             val chance = generator.nextInt(100)
@@ -43,8 +45,8 @@ class Duel(target: Member) {
                 // 两败俱伤
                 val pos1 = DuelPosition(generator.nextInt(totalChance) + 1)
                 val pos2 = DuelPosition(generator.nextInt(totalChance) + 1)
-                waiter!!.mute(pos1.getMute())
-                fighter.mute(pos2.getMute())
+                if (!isWaiterAdmin) waiter!!.mute(pos1.getMute())
+                if (!isAdmin) fighter.mute(pos2.getMute())
                 isFinished = true
                 messageGenerator(
                     messageEndDuelAllHurt,
@@ -80,11 +82,12 @@ class Duel(target: Member) {
                     fighter
                 }
                 val loser = if (bool) {
+                    if (!isAdmin) fighter.mute(pos.getMute())
                     fighter
                 } else {
+                    if (!isWaiterAdmin) waiter!!.mute(pos.getMute())
                     waiter!!
                 }
-                loser.mute(pos.getMute())
                 isFinished = true
                 messageGenerator(
                     messageEndDuel,

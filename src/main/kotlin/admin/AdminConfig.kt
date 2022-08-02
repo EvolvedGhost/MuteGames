@@ -10,4 +10,7 @@ object AdminConfig : ReadOnlyPluginConfig("admin") {
 
     @ValueDescription("提供一些基础的Debug信息")
     val debug: Boolean by value(false)
+
+    @ValueDescription("管理员/群主等比机器人权限同级或更高的能否游玩？")
+    val canAdminPlayIt: Boolean by value(false)
 }
