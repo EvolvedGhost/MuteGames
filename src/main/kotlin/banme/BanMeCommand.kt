@@ -1,6 +1,7 @@
 package com.evolvedghost.banme
 
 import com.evolvedghost.MuteGames
+import com.evolvedghost.banme.BanMeConfig.allowCustomBanMe
 import com.evolvedghost.banme.BanMeConfig.banMeTime
 import com.evolvedghost.banme.BanMeConfig.banMeTimeMax
 import com.evolvedghost.banme.BanMeConfig.messageBanMe
@@ -46,7 +47,28 @@ object BanMeCommand : SimpleCommand(
                 )
             )
         )
+    }
 
-
+    @Handler
+    suspend fun banMe(sender: CommandSender, seconds: Int) {
+        if (!allowCustomBanMe) return
+        val permit = checkPermit(sender)
+        if (permit.canReturn) return
+        val target = permit.target ?: return
+        val isTargetAdmin = permit.isTargetAdmin ?: return
+        val time = if (seconds < 1) 1
+        else if (seconds > 2592000) 2592000
+        else seconds
+        if (!isTargetAdmin) target.mute(time)
+        sender.sendMessage(
+            messageGenerator(
+                messageBanMe, arrayOf("<target>", "<mute-s>", "<mute-f>"),
+                arrayOf(
+                    target.at().serializeToMiraiCode(),
+                    time.toString(),
+                    timeFormatter(time),
+                )
+            )
+        )
     }
 }
