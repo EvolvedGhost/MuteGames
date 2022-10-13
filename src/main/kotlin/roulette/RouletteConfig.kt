@@ -102,6 +102,20 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
 
     @ValueDescription(
         """
+        击发消息但对方是管理员无法禁言，可用替代项目为:
+        <bullet> 子弹数量
+        <chamber> 弹膛数量
+        <remain-bullet> 剩余子弹数
+        <remain-chamber> 剩余击发数
+        <mute-s> 禁言时间（单位秒）（例:5）
+        <mute-f> 禁言时间（例:11天4时5分14秒）
+        <target> @触发人
+    """
+    )
+    val messageShotButAdmin: String by value("<target> 开了一枪，枪响了，但对方是管理员，逃掉了<mute-f>的禁言")
+
+    @ValueDescription(
+        """
         未击发消息，可用替代项目为:
         <bullet> 子弹数量
         <chamber> 弹膛数量

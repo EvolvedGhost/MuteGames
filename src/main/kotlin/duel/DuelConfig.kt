@@ -84,6 +84,19 @@ object DuelConfig : ReadOnlyPluginConfig("duel") {
 
     @ValueDescription(
         """
+        决斗消息但对方是管理员无法禁言，可用替代项目为:
+        <target-win> @获胜者
+        <target-lose> @失败者
+        <position> 击伤部位
+        <mute-s> 禁言时间（单位秒）（例:5）
+        <mute-f> 禁言时间（例:11天4时5分14秒）
+    """
+    )
+    val messageEndDuelButAdmin: String by value("<target-lose> 的<position>被<target-win> 开枪击中，但对方是管理员，逃掉了<mute-f>的禁言")
+
+
+    @ValueDescription(
+        """
         两败俱伤消息，可用替代项目为:
         <target-1> @决斗者1
         <target-2> @决斗者2

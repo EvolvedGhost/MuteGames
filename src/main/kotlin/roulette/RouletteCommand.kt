@@ -5,6 +5,7 @@ import com.evolvedghost.roulette.RouletteConfig.messageEnd
 import com.evolvedghost.roulette.RouletteConfig.messageForceEnd
 import com.evolvedghost.roulette.RouletteConfig.messagePass
 import com.evolvedghost.roulette.RouletteConfig.messageShot
+import com.evolvedghost.roulette.RouletteConfig.messageShotButAdmin
 import com.evolvedghost.roulette.RouletteConfig.messageStart
 import com.evolvedghost.roulette.RouletteConfig.waitTime
 import com.evolvedghost.utils.checkPermit
@@ -30,7 +31,17 @@ object RouletteCommand : SimpleCommand(
         arrayOf("<bullet>", "<chamber>", "<remain-bullet>", "<remain-chamber>", "<mute-s>", "<mute-f>", "<target>")
 
     private val keywordArrayWithTimeout =
-        arrayOf("<bullet>", "<chamber>", "<remain-bullet>", "<remain-chamber>", "<mute-s>", "<mute-f>", "<timeout-s>", "<timeout-f>","<target>")
+        arrayOf(
+            "<bullet>",
+            "<chamber>",
+            "<remain-bullet>",
+            "<remain-chamber>",
+            "<mute-s>",
+            "<mute-f>",
+            "<timeout-s>",
+            "<timeout-f>",
+            "<target>"
+        )
 
     @Handler
     suspend fun roulette(sender: CommandSender) {
@@ -62,18 +73,33 @@ object RouletteCommand : SimpleCommand(
                 if (rouletteMap[group.id]!!.shot()) {
                     target.mute(rouletteMap[group.id]!!.getMuteInt())
                     sender.sendMessage(
-                        messageGenerator(
-                            messageShot, keywordArray,
-                            arrayOf(
-                                rouletteMap[group.id]!!.getBullet(),
-                                rouletteMap[group.id]!!.getChamber(),
-                                rouletteMap[group.id]!!.getBulletRemain(),
-                                rouletteMap[group.id]!!.getChamberRemain(),
-                                rouletteMap[group.id]!!.getMute(),
-                                rouletteMap[group.id]!!.getMuteFormat(),
-                                target.at().serializeToMiraiCode()
+                        if (permit.isTargetAdmin) {
+                            messageGenerator(
+                                messageShotButAdmin, keywordArray,
+                                arrayOf(
+                                    rouletteMap[group.id]!!.getBullet(),
+                                    rouletteMap[group.id]!!.getChamber(),
+                                    rouletteMap[group.id]!!.getBulletRemain(),
+                                    rouletteMap[group.id]!!.getChamberRemain(),
+                                    rouletteMap[group.id]!!.getMute(),
+                                    rouletteMap[group.id]!!.getMuteFormat(),
+                                    target.at().serializeToMiraiCode()
+                                )
                             )
-                        )
+                        } else {
+                            messageGenerator(
+                                messageShot, keywordArray,
+                                arrayOf(
+                                    rouletteMap[group.id]!!.getBullet(),
+                                    rouletteMap[group.id]!!.getChamber(),
+                                    rouletteMap[group.id]!!.getBulletRemain(),
+                                    rouletteMap[group.id]!!.getChamberRemain(),
+                                    rouletteMap[group.id]!!.getMute(),
+                                    rouletteMap[group.id]!!.getMuteFormat(),
+                                    target.at().serializeToMiraiCode()
+                                )
+                            )
+                        }
                     )
                 } else {
                     sender.sendMessage(

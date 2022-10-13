@@ -11,7 +11,7 @@ import net.mamoe.mirai.contact.isOwner
 
 data class Permit(
     var canReturn: Boolean,
-    var isTargetAdmin: Boolean? = null,
+    var isTargetAdmin: Boolean,
     var group: Group? = null,
     var target: Member? = null
 )
@@ -22,13 +22,13 @@ data class Permit(
  * 0 -> false
  */
 fun checkPermit(sender: CommandSender): Permit {
-    if (sender !is GroupAwareCommandSender) return Permit(true)
+    if (sender !is GroupAwareCommandSender) return Permit(true, false)
     val group = sender.group
     val bot = group.botAsMember
     val target = group.members[sender.user.id]
-    if (target == null || !bot.isOperator()) return Permit(true)
+    if (target == null || !bot.isOperator()) return Permit(true, false)
     val isTargetAdmin = if (bot.isOwner()) false
     else target.isOperator()
-    if (isTargetAdmin && !AdminConfig.canAdminPlayIt) return Permit(true)
+    if (isTargetAdmin && !AdminConfig.canAdminPlayIt) return Permit(true, isTargetAdmin)
     return Permit(false, isTargetAdmin, group, target)
 }

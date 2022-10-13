@@ -29,7 +29,7 @@ object DuelCommand : SimpleCommand(
         if (permit.canReturn) return
         val group = permit.group ?: return
         val target = permit.target ?: return
-        val isTargetAdmin = permit.isTargetAdmin ?: return
+        val isTargetAdmin = permit.isTargetAdmin
         duelMapLock.withLock {
             if (duelMap[group.id] == null || duelMap[group.id]!!.isFinished()) {
                 duelMap[group.id] = Duel(target, sender, isTargetAdmin)

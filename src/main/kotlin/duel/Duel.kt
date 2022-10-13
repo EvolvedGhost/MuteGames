@@ -3,6 +3,7 @@ package com.evolvedghost.duel
 import com.evolvedghost.duel.DuelConfig.allHurt
 import com.evolvedghost.duel.DuelConfig.messageEndDuel
 import com.evolvedghost.duel.DuelConfig.messageEndDuelAllHurt
+import com.evolvedghost.duel.DuelConfig.messageEndDuelButAdmin
 import com.evolvedghost.duel.DuelConfig.waitTime
 import com.evolvedghost.utils.debugLogger
 import com.evolvedghost.utils.exceptionLogger
@@ -138,23 +139,43 @@ class Duel(target: Member, sender: CommandSender, isAdmin: Boolean) {
                 } catch (e: Exception) {
                     exceptionLogger(e)
                 }
-                messageGenerator(
-                    messageEndDuel,
-                    arrayOf(
-                        "<target-win>",
-                        "<target-lose>",
-                        "<position>",
-                        "<mute-s>",
-                        "<mute-f>"
-                    ),
-                    arrayOf(
-                        winner.at().serializeToMiraiCode(),
-                        loser.at().serializeToMiraiCode(),
-                        pos.getPosition(),
-                        pos.getMute().toString(),
-                        timeFormatter(pos.getMute()),
+                if(isAdmin){
+                    messageGenerator(
+                        messageEndDuelButAdmin,
+                        arrayOf(
+                            "<target-win>",
+                            "<target-lose>",
+                            "<position>",
+                            "<mute-s>",
+                            "<mute-f>"
+                        ),
+                        arrayOf(
+                            winner.at().serializeToMiraiCode(),
+                            loser.at().serializeToMiraiCode(),
+                            pos.getPosition(),
+                            pos.getMute().toString(),
+                            timeFormatter(pos.getMute()),
+                        )
                     )
-                )
+                }else{
+                    messageGenerator(
+                        messageEndDuel,
+                        arrayOf(
+                            "<target-win>",
+                            "<target-lose>",
+                            "<position>",
+                            "<mute-s>",
+                            "<mute-f>"
+                        ),
+                        arrayOf(
+                            winner.at().serializeToMiraiCode(),
+                            loser.at().serializeToMiraiCode(),
+                            pos.getPosition(),
+                            pos.getMute().toString(),
+                            timeFormatter(pos.getMute()),
+                        )
+                    )
+                }
             }
         } else messageGenerator("发生错误")
     }
