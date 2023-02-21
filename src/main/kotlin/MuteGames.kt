@@ -16,7 +16,7 @@ object MuteGames : KotlinPlugin(
     JvmPluginDescription(
         id = "com.evolvedghost.mutegames",
         name = "MuteGames",
-        version = "0.0.3",
+        version = "0.0.4",
     ) {
         author("EvolvedGhost")
         info("禁言小游戏合集")
