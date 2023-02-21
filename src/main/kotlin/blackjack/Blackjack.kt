@@ -9,10 +9,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.contact.Member
-import net.mamoe.mirai.message.data.MessageChain
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.at
-import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.contact.nameCardOrNick
+import net.mamoe.mirai.message.data.*
 import java.lang.StringBuilder
 import java.util.*
 
@@ -81,21 +79,30 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
             try {
                 Thread.sleep(BlackjackConfig.autoFinishRoundTimer.toLong() * 1000)
                 GlobalScope.launch {
-                    sender.sendMessage(
-                        messageGenerator(
-                            BlackjackConfig.messageAutoFinish,
-                            arrayOf(
-                                "<timeout-s>",
-                                "<timeout-f>",
-                                "<target>"
-                            ),
-                            arrayOf(
-                                BlackjackConfig.autoFinishRoundTimer.toString(),
-                                timeFormatter(BlackjackConfig.autoFinishRoundTimer),
-                                promoter.at().serializeToMiraiCode()
+                    val nodes = mutableListOf<ForwardMessage.Node>()
+                    nodes.add(
+                        ForwardMessage.Node(
+                            senderId = sender.bot!!.id,
+                            senderName = sender.bot!!.nameCardOrNick,
+                            time = (System.currentTimeMillis() / 1000).toInt(),
+                            message = messageGenerator(
+                                BlackjackConfig.messageAutoFinish,
+                                arrayOf(
+                                    "<timeout-s>",
+                                    "<timeout-f>",
+                                    "<target>"
+                                ),
+                                arrayOf(
+                                    BlackjackConfig.autoFinishRoundTimer.toString(),
+                                    timeFormatter(BlackjackConfig.autoFinishRoundTimer),
+                                    promoter.at().serializeToMiraiCode()
+                                )
                             )
-                        ) + messageGenerator(getFinish(true))
+                        )
                     )
+                    nodes.addAll(getFinish(true))
+                    val forward = RawForwardMessage(nodes).render(displayStrategy = ForwardMessage.DisplayStrategy)
+                    sender.sendMessage(forward)
                 }
             } catch (_: Exception) {
             } finally {
@@ -207,17 +214,26 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
             exceptionLogger(e)
         }
         // 成功开局
-        sender.sendMessage(
-            messageGenerator(
-                BlackjackConfig.messageStart,
-                arrayOf(
-                    "<target>"
-                ),
-                arrayOf(
-                    promoter.at().serializeToMiraiCode()
+        val nodes = mutableListOf<ForwardMessage.Node>()
+        nodes.add(
+            ForwardMessage.Node(
+                senderId = sender.bot!!.id,
+                senderName = sender.bot!!.nameCardOrNick,
+                time = (System.currentTimeMillis() / 1000).toInt(),
+                message = messageGenerator(
+                    BlackjackConfig.messageStart,
+                    arrayOf(
+                        "<target>"
+                    ),
+                    arrayOf(
+                        promoter.at().serializeToMiraiCode()
+                    )
                 )
-            ) + messageGenerator(getStart())
+            )
         )
+        nodes.addAll(getStart())
+        val forward = RawForwardMessage(nodes).render(displayStrategy = ForwardMessage.DisplayStrategy)
+        sender.sendMessage(forward)
     }
 
     suspend fun addCard(player: Member) {
@@ -370,20 +386,37 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
     }
 
     private suspend fun finish() {
-        sender.sendMessage(
-            messageGenerator(
-                BlackjackConfig.messageFinish,
-                arrayOf(
-                    "<target>"
-                ),
-                arrayOf(
-                    promoter.at().serializeToMiraiCode()
+        val nodes = mutableListOf<ForwardMessage.Node>()
+        nodes.add(
+            ForwardMessage.Node(
+                senderId = sender.bot!!.id,
+                senderName = sender.bot!!.nameCardOrNick,
+                time = (System.currentTimeMillis() / 1000).toInt(),
+                message = messageGenerator(
+                    BlackjackConfig.messageFinish,
+                    arrayOf(
+                        "<target>"
+                    ),
+                    arrayOf(
+                        promoter.at().serializeToMiraiCode()
+                    )
                 )
-            ) + messageGenerator(getFinish(false))
+            )
         )
+        nodes.addAll(getFinish(false))
+        val forward = RawForwardMessage(nodes).render(object : ForwardMessage.DisplayStrategy {
+            override fun generateTitle(forward: RawForwardMessage): String {
+                return "21点结束"
+            }
+
+            override fun generateSummary(forward: RawForwardMessage): String {
+                return "查看本轮21点战局"
+            }
+        })
+        sender.sendMessage(forward)
     }
 
-    private suspend fun getFinish(fromAutoFinish: Boolean): String {
+    private suspend fun getFinish(fromAutoFinish: Boolean): MutableList<ForwardMessage.Node> {
         end = true
         if (!fromAutoFinish) {
             try {
@@ -392,43 +425,60 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
                 exceptionLogger(e)
             }
         }
-        if (participants.size == 0) return ""
+        if (participants.size == 0) return mutableListOf()
         val totalScore = mutableMapOf<Member, Int>()
         participants.forEach {
             totalScore[it] = getTotal(it)
         }
         val max = Collections.max(totalScore.values)
-        val sb = StringBuilder("\n\n")
+        val nodes = mutableListOf<ForwardMessage.Node>()
         for ((member, total) in totalScore.entries) {
             if (total == max) {
-                sb.append(getPlayerWin(member))
+                nodes.add(
+                    ForwardMessage.Node(
+                        senderId = member.id,
+                        senderName = member.nameCardOrNick,
+                        time = (System.currentTimeMillis() / 1000).toInt(),
+                        message = getPlayerWin(member)
+                    )
+                )
             } else {
-                sb.append(getPlayerLose(member))
+                nodes.add(
+                    ForwardMessage.Node(
+                        senderId = member.id,
+                        senderName = member.nameCardOrNick,
+                        time = (System.currentTimeMillis() / 1000).toInt(),
+                        message = getPlayerLose(member)
+                    )
+                )
             }
-            sb.append("\n\n")
         }
-        return sb.toString()
+        return nodes
     }
 
-    private fun getStart(): String {
-        val sb = StringBuilder("\n\n")
+    private fun getStart(): MutableList<ForwardMessage.Node> {
+        val nodes = mutableListOf<ForwardMessage.Node>()
         for (p in participants) {
-            sb.append(
-                messageGeneratorString(
-                    BlackjackConfig.messageStartCardList,
-                    arrayOf(
-                        "<owner>",
-                        "<cardlist>"
-                    ),
-                    arrayOf(
-                        p.at().serializeToMiraiCode(),
-                        getPlayerCard(p)
+            nodes.add(
+                ForwardMessage.Node(
+                    senderId = p.id,
+                    senderName = p.nameCardOrNick,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    message = messageGenerator(
+                        BlackjackConfig.messageStartCardList,
+                        arrayOf(
+                            "<owner>",
+                            "<cardlist>"
+                        ),
+                        arrayOf(
+                            p.at().serializeToMiraiCode(),
+                            getPlayerCard(p)
+                        )
                     )
                 )
             )
-            sb.append("\n\n")
         }
-        return sb.toString()
+        return nodes
     }
 
     private fun getTotal(player: Member): Int {
@@ -479,8 +529,8 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         )
     }
 
-    private fun getPlayerWin(player: Member): String {
-        return messageGeneratorString(
+    private fun getPlayerWin(player: Member): MessageChain {
+        return messageGenerator(
             BlackjackConfig.messageWin,
             arrayOf(
                 "<target>",
@@ -493,10 +543,10 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         )
     }
 
-    private suspend fun getPlayerLose(player: Member): String {
+    private suspend fun getPlayerLose(player: Member): MessageChain {
         val banTime = (21 - getTotal(player)) * BlackjackConfig.loserMultiplier
         player.mute(banTime)
-        return messageGeneratorString(
+        return messageGenerator(
             BlackjackConfig.messageLose,
             arrayOf(
                 "<bantime-s>",

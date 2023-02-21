@@ -17,9 +17,8 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.at
-import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.contact.nameCardOrNick
+import net.mamoe.mirai.message.data.*
 import java.util.*
 
 object BlackjackCommand : SimpleCommand(
@@ -93,25 +92,64 @@ object BlackjackCommand : SimpleCommand(
             else "未定义！请联系机器人所有者！"
             val argGiveUp = if (aliasGiveUp.size > 0) aliasGiveUp[0]
             else "未定义！请联系机器人所有者！"
-            sender.sendMessage(buildMessageChain {
-                +target.at()
-                +PlainText(
-                    " 欢迎游玩禁言21点\n" +
-                            "游戏玩法：拿到21点者获胜，如果无人拿到21点，则最接近21点者获胜；" +
-                            "其余的人则会被禁言 (21-所拿点数)×$loserMultiplier 秒；" +
-                            "你可以提前放弃投降，此时你会被禁言 (21-所拿点数)×$giveUpMultiplier 秒；" +
-                            "如果你超过21点爆牌，则会直接禁言 $bustBanTime 秒\n" +
-                            "游戏规则：2-10表示2-10，J、Q、K表示10，" +
-                            "A在未满21时表示11，已满21后表示1，所有人停牌后系统自动结算，" +
-                            "爆牌和投降的玩家会被直接移除\n" +
-                            "游戏指令：\n$arg0 > 举行或加入一场21点\n" +
-                            "$arg0 $argStart > 开始刚刚举行的21点\n" +
-                            "$arg0 $argAdd > 游戏开始后，进行拿牌\n" +
-                            "$arg0 $argStop > 游戏开始后，进行停牌\n" +
-                            "$arg0 $argGiveUp > 游戏开始后，放弃/投降\n" +
-                            "$arg0 $argHelp > 游戏帮助"
+            val argCheck = if (aliasCheck.size > 0) aliasCheck[0]
+            else "未定义！请联系机器人所有者！"
+            val nodes = mutableListOf<ForwardMessage.Node>()
+            nodes.add(
+                ForwardMessage.Node(
+                    senderId = sender.bot!!.id,
+                    senderName = sender.bot!!.nameCardOrNick,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    message = PlainText("欢迎游玩禁言21点")
                 )
-            })
+            )
+            nodes.add(
+                ForwardMessage.Node(
+                    senderId = sender.bot!!.id,
+                    senderName = sender.bot!!.nameCardOrNick,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    message = PlainText(
+                        """游戏玩法：
+拿到21点者获胜，如果无人拿到21点，则最接近21点者获胜；
+其余的人则会被禁言 (21-所拿点数)×$loserMultiplier 秒；
+你可以提前放弃投降，此时你会被禁言 (21-所拿点数)×$giveUpMultiplier 秒；
+如果你超过21点爆牌，则会直接禁言 $bustBanTime 秒"""
+                    )
+                )
+            )
+            nodes.add(
+                ForwardMessage.Node(
+                    senderId = sender.bot!!.id,
+                    senderName = sender.bot!!.nameCardOrNick,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    message = PlainText(
+                        """游戏规则：
+2-10表示2-10，J、Q、K表示10，
+A在未满21时表示11，已满21后表示1，
+所有人停牌后系统自动结算，
+爆牌和投降的玩家会被直接移除"""
+                    )
+                )
+            )
+            nodes.add(
+                ForwardMessage.Node(
+                    senderId = sender.bot!!.id,
+                    senderName = sender.bot!!.nameCardOrNick,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    message = PlainText(
+                        """游戏指令：
+$arg0 > 举行或加入一场21点
+$arg0 $argStart > 开始刚刚举行的21点
+$arg0 $argAdd > 游戏开始后，进行拿牌
+$arg0 $argStop > 游戏开始后，进行停牌
+$arg0 $argGiveUp > 游戏开始后，放弃/投降
+$arg0 $argCheck > 游戏开始后，查看手牌
+$arg0 $argHelp > 游戏帮助"""
+                    )
+                )
+            )
+            val forward = RawForwardMessage(nodes).render(displayStrategy = ForwardMessage.DisplayStrategy)
+            sender.sendMessage(forward)
             return
         }
         blackjackMapLock.withLock {
