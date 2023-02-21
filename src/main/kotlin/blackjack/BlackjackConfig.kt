@@ -8,22 +8,22 @@ object BlackjackConfig : ReadOnlyPluginConfig("blackjack") {
     @ValueDescription("自定义指令触发21点\n请注意，该自定义指令的更改必须重启Mirai")
     val alias: MutableList<String> by value(mutableListOf("21点"))
 
-    @ValueDescription("自定义指令触发21点的开始指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的开始指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasStart: MutableList<String> by value(mutableListOf("开始", "start"))
 
-    @ValueDescription("自定义指令触发21点的拿牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的拿牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasAdd: MutableList<String> by value(mutableListOf("拿牌", "add"))
 
-    @ValueDescription("自定义指令触发21点的停牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的停牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasStop: MutableList<String> by value(mutableListOf("停牌", "stop"))
 
-    @ValueDescription("自定义指令触发21点的投降指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的投降指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasGiveUp: MutableList<String> by value(mutableListOf("投降", "放弃", "giveup"))
 
-    @ValueDescription("自定义指令触发21点的看牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的看牌指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasCheck: MutableList<String> by value(mutableListOf("看牌", "check"))
 
-    @ValueDescription("自定义指令触发21点的帮助指令\n该自定义指令的更改不必重启Mirai，可插件内reload")
+    @ValueDescription("自定义指令触发21点的帮助指令\n该自定义指令的更改不必重启Mirai，可插件内reload\n英文请使用小写字母")
     val aliasHelp: MutableList<String> by value(mutableListOf("帮助", "help"))
 
     @ValueDescription("输家禁言倍率，计算方式：倍率×(21-输家所持点数)秒")

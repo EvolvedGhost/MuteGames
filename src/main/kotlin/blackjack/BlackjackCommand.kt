@@ -20,6 +20,7 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.at
 import net.mamoe.mirai.message.data.buildMessageChain
+import java.util.*
 
 object BlackjackCommand : SimpleCommand(
     MuteGames,
@@ -62,12 +63,13 @@ object BlackjackCommand : SimpleCommand(
         if (permit.canReturn) return
         val target = permit.target ?: return
         val group = permit.group ?: return
-        val stats = if (aliasStart.contains(command)) 1
-        else if (aliasAdd.contains(command)) 2
-        else if (aliasStop.contains(command)) 3
-        else if (aliasGiveUp.contains(command)) 4
-        else if (aliasCheck.contains(command)) 5
-        else if (aliasHelp.contains(command)) 0
+        val commandLowerCase = command.lowercase(Locale.ENGLISH)
+        val stats = if (aliasStart.contains(commandLowerCase)) 1
+        else if (aliasAdd.contains(commandLowerCase)) 2
+        else if (aliasStop.contains(commandLowerCase)) 3
+        else if (aliasGiveUp.contains(commandLowerCase)) 4
+        else if (aliasCheck.contains(commandLowerCase)) 5
+        else if (aliasHelp.contains(commandLowerCase)) 0
         else -1
         val arg0 = if (alias.size > 0) alias[0]
         else "blackjack"
