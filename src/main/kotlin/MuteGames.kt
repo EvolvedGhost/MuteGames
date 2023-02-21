@@ -2,6 +2,7 @@ package com.evolvedghost
 
 import com.evolvedghost.admin.AdminCommand
 import com.evolvedghost.banme.BanMeCommand
+import com.evolvedghost.blackjack.BlackjackCommand
 import com.evolvedghost.duel.DuelCommand
 import com.evolvedghost.roulette.RouletteCommand
 import com.evolvedghost.utils.reloadPlugin
@@ -27,6 +28,7 @@ object MuteGames : KotlinPlugin(
         BanMeCommand.register()
         DuelCommand.register()
         RouletteCommand.register()
+        BlackjackCommand.register()
         logger.info { "禁言游戏已加载" }
     }
 
@@ -36,6 +38,7 @@ object MuteGames : KotlinPlugin(
         BanMeCommand.unregister()
         DuelCommand.unregister()
         RouletteCommand.unregister()
+        BlackjackCommand.unregister()
         logger.info { "禁言游戏已退出" }
     }
 }

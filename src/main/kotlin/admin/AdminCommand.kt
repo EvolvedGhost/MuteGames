@@ -1,6 +1,7 @@
 package com.evolvedghost.admin
 
 import com.evolvedghost.MuteGames
+import com.evolvedghost.blackjack.blackjackMap
 import com.evolvedghost.duel.duelMap
 import com.evolvedghost.roulette.rouletteMap
 import com.evolvedghost.utils.reloadPlugin
@@ -44,6 +45,19 @@ object AdminCommand : CompositeCommand(
                 sender.sendMessage("已强制结束决斗")
             } else {
                 sender.sendMessage("没有进行中的决斗")
+            }
+        }
+    }
+
+    @SubCommand("bjStop", "停止21点")
+    @Description("停止本群的21点")
+    suspend fun bjStop(sender: CommandSender) {
+        if (sender is GroupAwareCommandSender) {
+            if (blackjackMap[sender.group.id] != null && !blackjackMap[sender.group.id]!!.isEnd()) {
+                blackjackMap[sender.group.id]!!.endByAdmin()
+                sender.sendMessage("已强制结束21点")
+            } else {
+                sender.sendMessage("没有进行中的21点")
             }
         }
     }

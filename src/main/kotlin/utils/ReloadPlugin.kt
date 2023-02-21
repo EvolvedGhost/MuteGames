@@ -6,6 +6,8 @@ import com.evolvedghost.admin.AdminConfig
 import com.evolvedghost.admin.adminInit
 import com.evolvedghost.banme.BanMeConfig
 import com.evolvedghost.banme.banMeInit
+import com.evolvedghost.blackjack.BlackjackConfig
+import com.evolvedghost.blackjack.blackjackInit
 import com.evolvedghost.duel.DuelConfig
 import com.evolvedghost.duel.duelInit
 import com.evolvedghost.roulette.RouletteConfig
@@ -24,4 +26,7 @@ fun reloadPlugin() {
     RouletteConfig.reload()
     rouletteInit()
     RouletteConfig.save()
+    BlackjackConfig.reload()
+    blackjackInit()
+    BlackjackConfig.save()
 }
