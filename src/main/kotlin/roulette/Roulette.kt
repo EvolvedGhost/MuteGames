@@ -1,6 +1,7 @@
 package com.evolvedghost.roulette
 
 import com.evolvedghost.roulette.RouletteConfig.messageTimeout
+import com.evolvedghost.roulette.RouletteConfig.messageTimeoutWithBan
 import com.evolvedghost.roulette.RouletteConfig.waitTime
 import com.evolvedghost.utils.debugLogger
 import com.evolvedghost.utils.exceptionLogger
@@ -10,9 +11,11 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.CommandSender
+import net.mamoe.mirai.contact.Member
+import net.mamoe.mirai.message.data.at
 import kotlin.random.Random
 
-class Roulette(sender: CommandSender) {
+class Roulette(promoter: Member, sender: CommandSender) {
     private var finish = true
     private var sender: CommandSender? = null
     private var current = -1
@@ -28,31 +31,62 @@ class Roulette(sender: CommandSender) {
             try {
                 Thread.sleep(waitTime.toLong() * 1000)
                 GlobalScope.launch {
-                    sender.sendMessage(
-                        messageGenerator(
-                            messageTimeout,
-                            arrayOf(
-                                "<bullet>",
-                                "<chamber>",
-                                "<remain-bullet>",
-                                "<remain-chamber>",
-                                "<mute-s>",
-                                "<mute-f>",
-                                "<timeout-s>",
-                                "<timeout-f>"
-                            ),
-                            arrayOf(
-                                getBullet(),
-                                getChamber(),
-                                getBulletRemain(),
-                                getChamberRemain(),
-                                getMute(),
-                                getMuteFormat(),
-                                waitTime.toString(),
-                                timeFormatter(waitTime)
+                    if (RouletteConfig.timeOverBan) {
+                        promoter.mute(mute)
+                        sender.sendMessage(
+                            messageGenerator(
+                                messageTimeoutWithBan,
+                                arrayOf(
+                                    "<bullet>",
+                                    "<chamber>",
+                                    "<remain-bullet>",
+                                    "<remain-chamber>",
+                                    "<mute-s>",
+                                    "<mute-f>",
+                                    "<timeout-s>",
+                                    "<timeout-f>",
+                                    "<target>"
+                                ),
+                                arrayOf(
+                                    getBullet(),
+                                    getChamber(),
+                                    getBulletRemain(),
+                                    getChamberRemain(),
+                                    getMute(),
+                                    getMuteFormat(),
+                                    waitTime.toString(),
+                                    timeFormatter(waitTime),
+                                    promoter.at().serializeToMiraiCode()
+                                )
                             )
                         )
-                    )
+                    } else {
+                        sender.sendMessage(
+                            messageGenerator(
+                                messageTimeout,
+                                arrayOf(
+                                    "<bullet>",
+                                    "<chamber>",
+                                    "<remain-bullet>",
+                                    "<remain-chamber>",
+                                    "<mute-s>",
+                                    "<mute-f>",
+                                    "<timeout-s>",
+                                    "<timeout-f>"
+                                ),
+                                arrayOf(
+                                    getBullet(),
+                                    getChamber(),
+                                    getBulletRemain(),
+                                    getChamberRemain(),
+                                    getMute(),
+                                    getMuteFormat(),
+                                    waitTime.toString(),
+                                    timeFormatter(waitTime)
+                                )
+                            )
+                        )
+                    }
                 }
             } catch (_: Exception) {
             } finally {

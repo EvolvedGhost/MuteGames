@@ -52,7 +52,7 @@ object RouletteCommand : SimpleCommand(
         if (dataCorrect) {
             rouletteMapLock.withLock {
                 if (rouletteMap[group.id] == null || rouletteMap[group.id]!!.isFinished()) {
-                    rouletteMap[group.id] = Roulette(sender)
+                    rouletteMap[group.id] = Roulette(target, sender)
                     sender.sendMessage(
                         messageGenerator(
                             messageStart, keywordArrayWithTimeout,

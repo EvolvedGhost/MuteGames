@@ -11,6 +11,9 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
     @ValueDescription("轮盘等待时间，超过后上一个轮盘失效，单位：秒")
     val waitTime: Int by value(600)
 
+    @ValueDescription("轮盘超时后是否封禁发起人")
+    val timeOverBan by value(false)
+
     @ValueDescription("当最后数发均为子弹时强制结束游戏")
     val forceEndWhenAllRamin: Boolean by value(true)
 
@@ -70,6 +73,22 @@ object RouletteConfig : ReadOnlyPluginConfig("roulette") {
     """
     )
     val messageEnd: String by value("此轮俄罗斯轮盘结束")
+
+    @ValueDescription(
+        """
+        超时消息，可用替代项目为:
+        <bullet> 子弹数量
+        <chamber> 弹膛数量
+        <remain-bullet> 剩余子弹数
+        <remain-chamber> 剩余击发数
+        <mute-s> 禁言时间（单位秒）（例:5）
+        <mute-f> 禁言时间（例:11天4时5分14秒）
+        <timeout-s> 超时时间（单位秒）（例:5）
+        <timeout-f> 超时时间（例:11天4时5分14秒）
+        <target> @发起人
+    """
+    )
+    val messageTimeoutWithBan: String by value("此轮俄罗斯轮盘因超时结束，因未能全部击发发起人<target>被禁言<mute-f>")
 
     @ValueDescription(
         """
