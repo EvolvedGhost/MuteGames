@@ -147,7 +147,7 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         // 加入成功
         sender.sendMessage(buildMessageChain {
             +player.at()
-            +PlainText("加入成功")
+            +PlainText(" 加入成功")
         })
     }
 
@@ -163,7 +163,7 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         if (startWarning) {
             sender.sendMessage(buildMessageChain {
                 +player.at()
-                +PlainText("目前只有你一个人，再次输入开局指令即可强行开局")
+                +PlainText(" 目前只有你一个人，再次输入开局指令即可强行开局")
             })
             startWarning = false
             return
@@ -190,6 +190,7 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         }
         // 洗牌
         val rand = Random()
+        rand.setSeed(System.currentTimeMillis())
         for (i in card.size - 1 downTo 1) {
             val j = rand.nextInt(i + 1)
             val temp = card[i]
@@ -362,7 +363,7 @@ class Blackjack(private val promoter: Member, private val sender: CommandSender)
         if (finish) {
             sender.sendMessage(buildMessageChain {
                 +player.at()
-                +PlainText("你已不能再进行任何操作")
+                +PlainText(" 你已不能再进行任何操作")
             })
         }
         return finish
